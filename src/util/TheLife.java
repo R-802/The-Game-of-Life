@@ -1,8 +1,10 @@
 package util;
 
+import ecs100.UI;
 import main.TheGame;
 
 import static main.TheGame.drawGame;
+import static main.TheGame.print;
 
 public class TheLife {
     private static int activeCellCount = 0;
@@ -33,6 +35,8 @@ public class TheLife {
             }
         }
         activeCellCount = newActiveCellCount;  // Update the active cell count
+        UI.clearText();
+        UI.println("There are " + activeCellCount + " active cells");
         TheGame.CELLS = newGrid;
         drawGame();
     }

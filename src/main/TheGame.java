@@ -134,14 +134,8 @@ public class TheGame {
             drawGame();
         });
 
-        // Speed Adjustment
-        UI.addSlider("Simulation Speed (ms)", 0, 500, ANIMATION_SPEED, (double v) -> {
-            ANIMATION_SPEED = (int) v;
-            drawGame();
-        });
-
         // Seeds
-        UI.addButton("Random Seed", () -> {
+        UI.addButton("Random Fill", () -> {
             Seeds seeds = new Seeds();
             seeds.rand();
         });
@@ -153,14 +147,35 @@ public class TheGame {
             Seeds seeds = new Seeds();
             seeds.GGG();
         });
-
         UI.addButton("Lightweight Spaceship", () -> {
             Seeds seeds = new Seeds();
             seeds.LWSS();
         });
+        UI.addButton("Heavyweight Spaceship", () -> {
+            Seeds seeds = new Seeds();
+            seeds.HWSS();
+        });
+        UI.addButton("Penta-Decathlon", () -> {
+            Seeds seeds = new Seeds();
+            seeds.pentaDecathlon();
+        });
+        UI.addButton("Pulsar", () -> {
+            Seeds seeds = new Seeds();
+            seeds.pulsar();
+        });
+        UI.addButton("Cloverleaf", () -> {
+            Seeds seeds = new Seeds();
+            seeds.cloverleaf();
+        });
+
+        // Speed Adjustment
+        UI.addSlider("Simulation Speed (ms)", 0, 500, ANIMATION_SPEED, (double v) -> {
+            ANIMATION_SPEED = (int) v;
+            drawGame();
+        });
 
         // Utilities
-        UI.addButton("Toggle Grid Visibility", () -> {
+        UI.addButton("Grid Visibility", () -> {
             DRAW_GRID = !DRAW_GRID;
             drawGame();
         });
@@ -177,7 +192,7 @@ public class TheGame {
         print("  Select cells and click run to start!  ");
     }
 
-    public void print(String s) {
+    public static void print(String s) {
         for (char c : s.toCharArray()) {
             UI.print(c);
             UI.sleep(15);
@@ -186,11 +201,12 @@ public class TheGame {
     }
 
     public void doMouse(String action, double x, double y) {
-        if (action.equals("pressed")) {
-            int gridX = (int) (x / CELL_SIZE);
-            int gridY = (int) (y / CELL_SIZE);
-            if (gridX >= 0 && gridX < CELLS.length && gridY >= 0 && gridY < CELLS[0].length) {
-                CELLS[gridX][gridY] = !CELLS[gridX][gridY];
+        int gridX = (int) (x / CELL_SIZE);
+        int gridY = (int) (y / CELL_SIZE);
+
+        if (gridX >= 0 && gridX < CELLS.length && gridY >= 0 && gridY < CELLS[0].length) {
+            if (action.equals("pressed")) {
+                CELLS[gridX][gridY] = !CELLS[gridX][gridY] ;
                 UI.printMessage(" Selected Coordinate: row " + gridX + ", column " + gridY);
                 drawGame();
             }
