@@ -4,7 +4,6 @@ import ecs100.UI;
 import main.TheGame;
 
 import static main.TheGame.drawGame;
-import static main.TheGame.print;
 
 public class TheLife {
     private static int activeCellCount = 0;

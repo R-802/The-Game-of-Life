@@ -87,6 +87,14 @@ public class TheGame {
         drawGame();
     }
 
+    public static void print(String s) {
+        for (char c : s.toCharArray()) {
+            UI.print(c);
+            UI.sleep(15);
+        }
+        UI.println();
+    }
+
     public void setupGUI() {
         UI.initialise(); // Initialize UI and configure window properties
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -192,21 +200,13 @@ public class TheGame {
         print("  Select cells and click run to start!  ");
     }
 
-    public static void print(String s) {
-        for (char c : s.toCharArray()) {
-            UI.print(c);
-            UI.sleep(15);
-        }
-        UI.println();
-    }
-
     public void doMouse(String action, double x, double y) {
         int gridX = (int) (x / CELL_SIZE);
         int gridY = (int) (y / CELL_SIZE);
 
         if (gridX >= 0 && gridX < CELLS.length && gridY >= 0 && gridY < CELLS[0].length) {
             if (action.equals("pressed")) {
-                CELLS[gridX][gridY] = !CELLS[gridX][gridY] ;
+                CELLS[gridX][gridY] = !CELLS[gridX][gridY];
                 UI.printMessage(" Selected Coordinate: row " + gridX + ", column " + gridY);
                 drawGame();
             }
