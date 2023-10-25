@@ -1,4 +1,4 @@
-package operations;
+package util;
 
 import main.TheGame;
 
@@ -42,7 +42,7 @@ public class TheLife {
         for (int dr = -1; dr <= 1; dr++) {
             for (int dc = -1; dc <= 1; dc++) {
                 if (!(dr == 0 && dc == 0) && // Skip the cell itself
-                        row + dr >= 0 && row + dr < grid.length && col + dc >= 0 && col + dc < grid[row].length && grid[row + dr][col + dc]) {
+                        ((row + dr) >= 0) && ((row + dr) < grid.length) && ((col + dc) >= 0) && ((col + dc) < grid[row].length) && grid[row + dr][col + dc]) {
                     neighbors++;
                 }
             }
