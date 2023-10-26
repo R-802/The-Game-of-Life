@@ -20,7 +20,7 @@ Here you'll find the primary Java class `TheGame.java` which contains the main m
 
 ## How to Run
 
-Ensure you have a Java environment set up on your machine, then compile and run `TheGame.java`. Once the program is running, you will see a GUI window titled "The Game of Life" with various control buttons and a canvas area where the game takes place.
+Ensure you have a Java environment set up on your machine, then compile and run `TheGame.java`.
 
 ## Features
 
