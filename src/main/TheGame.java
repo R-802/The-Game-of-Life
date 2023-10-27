@@ -10,30 +10,30 @@ import java.util.Arrays;
 
 public class TheGame {
 
-    public static final int MIN_GRID_SIZE = 2;
-    private static final int BUFFER_X_OFFSET = 473, BUFFER_Y_OFFSET = 56; // TODO: Remove these offsets.
+    public static final int MIN_GRID_SIZE = 1;
+    private static final int BUFFER_X_OFFSET = 479, BUFFER_Y_OFFSET = 56; // TODO: Remove these offsets.
     public static int ANIMATION_SPEED = 100;
     public static int CELL_SIZE = 15, ROWS, COLUMNS;
     public static boolean[][] CELLS; // 2-dimensional array of boolean values (the cells)
     public static boolean PAUSE = false;
     private static boolean DRAW_GRID = true;
     private static Color CELL_COLOR = Color.black;
+    private static Color FOREGROUND_COL = Color.white;
 
     public static void drawGame() {
         int canvasWidth = UI.getCanvasWidth();
         int canvasHeight = UI.getCanvasHeight();
         Image imageBuffer = UI.getFrame().createVolatileImage(canvasWidth, canvasHeight);
         Graphics graphics = imageBuffer.getGraphics();
-
-        // Adaptive buffer adjustment
         if (UI.getCanvasWidth() != canvasWidth || UI.getCanvasHeight() != canvasHeight) {
             canvasWidth = UI.getCanvasWidth();
             canvasHeight = UI.getCanvasHeight();
             imageBuffer = UI.getFrame().createVolatileImage(canvasWidth, canvasHeight);
             graphics = imageBuffer.getGraphics();
+            initializeGrid();
         }
 
-        graphics.setColor(Color.white);
+        graphics.setColor(FOREGROUND_COL);
         graphics.fillRect(0, 0, canvasWidth, canvasHeight);
 
         // For each cell in the grid, check if active
@@ -43,7 +43,7 @@ public class TheGame {
                     graphics.setColor(CELL_COLOR);
                     graphics.fillRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 } else { // Erase if the cell is inactive
-                    graphics.setColor(Color.white);
+                    graphics.setColor(FOREGROUND_COL);
                     graphics.drawRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 }
             }
@@ -71,7 +71,7 @@ public class TheGame {
         int canvasHeight = UI.getCanvasHeight();
         int rows = canvasHeight / MIN_GRID_SIZE;
         int columns = canvasWidth / MIN_GRID_SIZE;
-        CELLS = new boolean[rows][columns];
+        CELLS = new boolean[columns][rows];
         drawGame();
     }
 
@@ -124,21 +124,17 @@ public class TheGame {
         });
         UI.addButton("Pause", () -> {
             PAUSE = true;
+            UI.clearText();
+            print("Paused");
             drawGame();
         });
-
-        // Change cell colour
-        UI.addButton("Cell Color", () -> {
-            Color chosenColor = JColorChooser.showDialog(null, "Choose Highlight Color", CELL_COLOR);
-            if (chosenColor != null) {  // If user didn't cancel
-                CELL_COLOR = chosenColor; // Change color
-            }
-        });
+        UI.addButton("Clear Cells", TheGame::clearCells);
 
         // Dynamic grid and cell size adjustment
-        UI.addSlider("Grid Size", MIN_GRID_SIZE, 50, CELL_SIZE, (double v) -> {
+        UI.addSlider("Cell Size", MIN_GRID_SIZE, 100, CELL_SIZE, (double v) -> {
             CELL_SIZE = (int) v;
             UI.clearGraphics();
+            UI.printMessage(" Grid Size: " + CELL_SIZE);
             drawGame();
         });
 
@@ -177,17 +173,27 @@ public class TheGame {
         });
 
         // Speed Adjustment
-        UI.addSlider("Simulation Speed (ms)", 0, 500, ANIMATION_SPEED, (double v) -> {
+        UI.addSlider("Generation Speed", 0, 500, ANIMATION_SPEED, (double v) -> {
             ANIMATION_SPEED = (int) v;
             drawGame();
         });
 
         // Utilities
+        UI.addButton("Cell Color", () -> {
+            Color chosenColor = JColorChooser.showDialog(null, "Choose Highlight Color", CELL_COLOR);
+            if (chosenColor != null) {  // If user didn't cancel
+                CELL_COLOR = chosenColor; // Change color
+            }
+        });
         UI.addButton("Grid Visibility", () -> {
             DRAW_GRID = !DRAW_GRID;
             drawGame();
         });
-        UI.addButton("Clear Cells", TheGame::clearCells);
+        UI.addButton("Dark Mode", () -> {
+            FOREGROUND_COL = Color.black;
+            CELL_COLOR = Color.white;
+            drawGame();
+        });
         UI.addButton("Quit", UI::quit);
         ROWS = UI.getCanvasWidth();
         COLUMNS = UI.getCanvasHeight();
@@ -203,7 +209,6 @@ public class TheGame {
     public void doMouse(String action, double x, double y) {
         int gridX = (int) (x / CELL_SIZE);
         int gridY = (int) (y / CELL_SIZE);
-
         if (gridX >= 0 && gridX < CELLS.length && gridY >= 0 && gridY < CELLS[0].length) {
             if (action.equals("pressed")) {
                 CELLS[gridX][gridY] = !CELLS[gridX][gridY];
