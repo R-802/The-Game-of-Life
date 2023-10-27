@@ -6,21 +6,29 @@ import util.TheLife;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class TheGame {
 
     public static final int MIN_GRID_SIZE = 1;
     private static final int BUFFER_X_OFFSET = 479, BUFFER_Y_OFFSET = 56; // TODO: Remove these offsets.
+    private static final List<Point> changedCells = new ArrayList<Point>();
     public static int ANIMATION_SPEED = 100;
     public static int CELL_SIZE = 15, ROWS, COLUMNS;
     public static boolean[][] CELLS; // 2-dimensional array of boolean values (the cells)
     public static boolean PAUSE = false;
     private static boolean DRAW_GRID = true;
     private static Color CELL_COLOR = Color.black;
-    private static Color FOREGROUND_COL = Color.white;
 
     /*----------------Graphics----------------*/
+    private static Color FOREGROUND_COL = Color.white;
+    // Fields to hold persistent objects
+    private static Image imageBuffer;
+    private static Graphics graphics;
+    private static int canvasWidth, canvasHeight;
+    private static boolean isDragging = false;  // new field to keep track of dragging state
 
     public static void setupGUI() {
         UI.initialise(); // Initialize UI and configure window properties
@@ -39,10 +47,6 @@ public class TheGame {
         UI.getFrame().setVisible(true);
         UI.setDivider(0.2);
 
-        // Mouse setup
-        UI.setMouseMotionListener(TheGame::doMouse);
-        UI.setMouseListener(TheGame::doMouse);
-
         // Run and pause
         UI.addButton("Run", () -> {
             PAUSE = false;
@@ -58,7 +62,6 @@ public class TheGame {
         UI.addButton("Clear Cells", () -> {
             clearCells();
             UI.clearText();
-            print("Cleared Cells");
         });
 
         // Dynamic grid and cell size adjustment
@@ -126,62 +129,52 @@ public class TheGame {
             drawGame();
         });
         UI.addButton("Quit", UI::quit);
-        ROWS = UI.getCanvasWidth();
-        COLUMNS = UI.getCanvasHeight();
-        initializeGrid();
+        initializeGrid(); // Must be before mouse init
+        UI.setMouseMotionListener(TheGame::doMouse);
         drawGame();
-
-        // Print sequence
         print("      Welcome to The Game of Life       ");
         print("========================================");
         print("  Select cells and click run to start!  ");
     }
 
     public static void drawGame() {
-        int canvasWidth = UI.getCanvasWidth();
-        int canvasHeight = UI.getCanvasHeight();
-        Image imageBuffer = UI.getFrame().createVolatileImage(canvasWidth, canvasHeight);
-        Graphics graphics = imageBuffer.getGraphics();
+            // Initialize persistent objects if null or canvas size changed
+            int newCanvasWidth = UI.getCanvasWidth(), newCanvasHeight = UI.getCanvasHeight();
+            if (imageBuffer == null || graphics == null || newCanvasWidth != canvasWidth || newCanvasHeight != canvasHeight) {
+                canvasWidth = newCanvasWidth;
+                canvasHeight = newCanvasHeight;
+                if (graphics != null) graphics.dispose();  // Dispose of old graphics object
+                imageBuffer = UI.getFrame().createVolatileImage(canvasWidth, canvasHeight);
+                graphics = imageBuffer.getGraphics();
+            }
 
-        if (UI.getCanvasWidth() != canvasWidth || UI.getCanvasHeight() != canvasHeight) {
-            canvasWidth = UI.getCanvasWidth();
-            canvasHeight = UI.getCanvasHeight();
-            imageBuffer = UI.getFrame().createVolatileImage(canvasWidth, canvasHeight);
-            graphics = imageBuffer.getGraphics();
-            initializeGrid();
-        }
+            graphics.setColor(FOREGROUND_COL);
+            graphics.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        graphics.setColor(FOREGROUND_COL);
-        graphics.fillRect(0, 0, canvasWidth, canvasHeight);
-
-        // For each cell in the grid, check if active
-        for (int row = 0; row < CELLS.length; row++) {
-            for (int col = 0; col < CELLS[row].length; col++) {
-                if (CELLS[row][col]) { // Draw if the cell is active
+            for (Point changedCell : changedCells) { // TODO: Fix concurrent mod exception
+                int row = changedCell.x;
+                int col = changedCell.y;
+                if (CELLS[row][col]) {
                     graphics.setColor(CELL_COLOR);
                     graphics.fillRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                } else { // Erase if the cell is inactive
+                } else {
                     graphics.setColor(FOREGROUND_COL);
                     graphics.drawRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 }
             }
-        }
 
-        if (DRAW_GRID && CELL_SIZE > 3) {
-            // Draw the gridlines
-            graphics.setColor(Color.black);
-            for (int x = 0; x <= canvasWidth; x += CELL_SIZE) {
-                graphics.drawLine(x, 0, x, canvasHeight);
+            if (DRAW_GRID && CELL_SIZE > 10) {
+                graphics.setColor(Color.black);
+                int max = (canvasWidth >= canvasHeight) ? canvasWidth : canvasHeight;
+                for (int i = 0; i <= max; i += CELL_SIZE) {
+                    graphics.drawLine(i, 0, i, canvasHeight);  // Vertical lines
+                    graphics.drawLine(0, i, canvasWidth, i);  // Horizontal lines
+                }
             }
-            for (int y = 0; y <= canvasHeight; y += CELL_SIZE) {
-                graphics.drawLine(0, y, canvasWidth, y);
-            }
-        }
 
-        Graphics overlay = UI.getFrame().getGraphics();
-        overlay.drawImage(imageBuffer, BUFFER_X_OFFSET, BUFFER_Y_OFFSET, null);
-        graphics.dispose();
-        overlay.dispose();
+            Graphics overlay = UI.getFrame().getGraphics();
+            overlay.drawImage(imageBuffer, BUFFER_X_OFFSET, BUFFER_Y_OFFSET, null);
+            overlay.dispose();
     }
 
     private static void doMouse(String action, double x, double y) {
@@ -189,16 +182,25 @@ public class TheGame {
         int gridY = (int) (y / CELL_SIZE);
         if (gridX >= 0 && gridX < CELLS.length && gridY >= 0 && gridY < CELLS[0].length) {
             if (action.equals("pressed")) {
+                isDragging = true;  // set dragging state to true on mouse press
                 CELLS[gridX][gridY] = !CELLS[gridX][gridY];
                 UI.printMessage(" Selected Coordinate: row " + gridX + ", column " + gridY);
                 drawGame();
+            } else if (action.equals("dragged") && isDragging) {
+                CELLS[gridX][gridY] = true;
+                changedCells.add(new Point(gridX, gridY));
+                UI.printMessage(" Selected Coordinate: row " + gridX + ", column " + gridY);
+                drawGame();
+            } else if (action.equals("released")) {
+                isDragging = false;  // reset dragging state on mouse release
             }
         }
     }
 
+
     /*----------------Util----------------*/
 
-    public static void runGame() {
+    private static void runGame() {
         TheLife.doStep(CELLS);
         while (TheLife.hasActiveCells() && !PAUSE) {
             drawGame();
@@ -215,13 +217,14 @@ public class TheGame {
     private static void initializeGrid() {
         int canvasWidth = UI.getCanvasWidth();
         int canvasHeight = UI.getCanvasHeight();
-        int rows = canvasHeight / MIN_GRID_SIZE;
-        int columns = canvasWidth / MIN_GRID_SIZE;
-        CELLS = new boolean[columns][rows];
+        ROWS = canvasHeight / MIN_GRID_SIZE;
+        COLUMNS = canvasWidth / MIN_GRID_SIZE;
+        CELLS = new boolean[COLUMNS][ROWS];
         drawGame();
     }
 
     public static void clearCells() {
+        changedCells.clear();
         for (boolean[] cell : CELLS) {
             Arrays.fill(cell, false);
         }
@@ -231,7 +234,7 @@ public class TheGame {
     public static void print(String s) {
         for (char c : s.toCharArray()) {
             UI.print(c);
-            UI.sleep(10);
+            UI.sleep(15);
         }
         UI.println();
     }
@@ -240,5 +243,4 @@ public class TheGame {
         TheGame theGame = new TheGame();
         setupGUI();
     }
-
 }
