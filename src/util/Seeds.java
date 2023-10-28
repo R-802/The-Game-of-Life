@@ -3,33 +3,42 @@ package util;
 import static main.TheGame.*;
 
 public class Seeds {
-    public void glider() {
+    public static void rand() {
         clearCells();
-        CELLS[1][2] = true;
-        CELLS[2][3] = true;
-        CELLS[3][1] = true;
-        CELLS[3][2] = true;
-        CELLS[3][3] = true;
+        for (int row = 0; row < cells.length; row++) {
+            for (int col = 0; col < cells[row].length; col++) {
+                cells[row][col] = Math.random() >= 0.5;
+            }
+        }
         drawGame();
     }
 
-    public void LWSS() {
+    public static void glider() {
         clearCells();
-        CELLS[2][3] = true;
-        CELLS[2][4] = true;
-        CELLS[3][2] = true;
-        CELLS[4][2] = true;
-        CELLS[4][5] = true;
-        CELLS[5][2] = true;
-        CELLS[5][3] = true;
-        CELLS[5][4] = true;
-        CELLS[5][5] = true;
+        cells[1][2] = true;
+        cells[2][3] = true;
+        cells[3][1] = true;
+        cells[3][2] = true;
+        cells[3][3] = true;
         drawGame();
     }
 
-    public void HWSS() {
+    public static void LWSS() {
         clearCells();
+        cells[2][3] = true;
+        cells[2][4] = true;
+        cells[3][2] = true;
+        cells[4][2] = true;
+        cells[4][5] = true;
+        cells[5][2] = true;
+        cells[5][3] = true;
+        cells[5][4] = true;
+        cells[5][5] = true;
+        drawGame();
+    }
 
+    public static void HWSS() {
+        clearCells();
         int[][] hwssCoords = {
                 {2, 3}, {2, 8},
                 {3, 2}, {3, 9},
@@ -37,30 +46,12 @@ public class Seeds {
                 {5, 2}, {5, 9},
                 {6, 2}, {6, 3}, {6, 4}, {6, 5}, {6, 6}, {6, 7}, {6, 8}
         };
-
-        for (int[] coord : hwssCoords) {
-            int row = coord[0];
-            int col = coord[1];
-            CELLS[row][col] = true;
-        }
-
+        addCoords(hwssCoords);
         drawGame();
     }
 
-    public void rand() {
+    public static void GGG() {
         clearCells();
-        for (int row = 0; row < CELLS.length; row++) {
-            for (int col = 0; col < CELLS[row].length; col++) {
-                CELLS[row][col] = Math.random() >= 0.5;
-            }
-        }
-        drawGame();
-    }
-
-    public void GGG() {
-        clearCells();
-
-        // Coordinates for the Gosper Glider Gun
         int[][] gunCoords = {
                 {1, 25},
                 {2, 23}, {2, 25},
@@ -72,20 +63,12 @@ public class Seeds {
                 {8, 12}, {8, 16},
                 {9, 13}, {9, 14}
         };
-
-
-        // Set the cells for the Gosper Glider Gun pattern
-        for (int[] coord : gunCoords) {
-            int row = coord[0];
-            int col = coord[1];
-            CELLS[row][col] = true;
-        }
+        addCoords(gunCoords);
         drawGame();
     }
 
-    public void pulsar() {
+    public static void pulsar() {
         clearCells();
-
         int[][] pulsarCoords = {
                 {4, 2}, {4, 3}, {4, 4}, {4, 8}, {4, 9}, {4, 10},
                 {6, 2}, {6, 4}, {6, 8}, {6, 10},
@@ -111,19 +94,12 @@ public class Seeds {
                 {18, 14}, {18, 16}, {18, 20}, {18, 22},
                 {19, 14}, {19, 15}, {19, 16}, {19, 20}, {19, 21}, {19, 22},
         };
-
-        for (int[] coord : pulsarCoords) {
-            int row = coord[0];
-            int col = coord[1];
-            CELLS[row][col] = true;
-        }
-
+        addCoords(pulsarCoords);
         drawGame();
     }
 
-    public void pentaDecathlon() {
+    public static void pentaDecathlon() {
         clearCells();
-
         int[][] pentaDecathlonCoords = {
                 {6, 10}, {6, 11}, {6, 12}, {6, 13},
                 {7, 9}, {7, 14},
@@ -135,20 +111,12 @@ public class Seeds {
                 {13, 9}, {13, 14},
                 {14, 10}, {14, 11}, {14, 12}, {14, 13},
         };
-
-
-        for (int[] coord : pentaDecathlonCoords) {
-            int row = coord[0];
-            int col = coord[1];
-            CELLS[row][col] = true;
-        }
-
+        addCoords(pentaDecathlonCoords);
         drawGame();
     }
 
-    public void cloverleaf() {
+    public static void cloverleaf() {
         clearCells();
-
         int[][] cloverleafCoords = {
                 {6, 10}, {6, 11}, {6, 14}, {6, 15},
                 {7, 9}, {7, 12}, {7, 13}, {7, 16},
@@ -160,13 +128,15 @@ public class Seeds {
                 {13, 9}, {13, 12}, {13, 13}, {13, 16},
                 {14, 10}, {14, 11}, {14, 14}, {14, 15},
         };
+        addCoords(cloverleafCoords);
+        drawGame();
+    }
 
-        for (int[] coord : cloverleafCoords) {
+    private static void addCoords(int[][] coords) {
+        for (int[] coord : coords) {
             int row = coord[0];
             int col = coord[1];
-            CELLS[row][col] = true;
+            cells[row][col] = true;
         }
-
-        drawGame();
     }
 }

@@ -8,7 +8,7 @@ import static main.TheGame.drawGame;
 public class TheLife {
     private static int activeCellCount = 0;
 
-    private static void doStep(boolean[][] grid) {
+    public static void doStep(boolean[][] grid) {
         boolean[][] newGrid = new boolean[grid.length][grid[0].length];
         int newActiveCellCount = 0;
         for (int row = 0; row < grid.length; row++) {
@@ -21,6 +21,11 @@ public class TheLife {
             }
         }
         activeCellCount = newActiveCellCount;  // Update the active cell count
+        TheGame.cells = newGrid;
+        drawGame();
+
+        UI.clearText();
+        UI.println("There are " + activeCellCount + " active cells");
     }
 
     private static int countNeighbors(boolean[][] grid, int row, int col) {
@@ -28,10 +33,13 @@ public class TheLife {
         outerLoop:
         for (int dr = -1; dr <= 1; dr++) {
             for (int dc = -1; dc <= 1; dc++) {
-                if (!(dr == 0 && dc == 0) && ((row + dr) >= 0) && ((row + dr) < grid.length) && ((col + dc) >= 0) && ((col + dc) < grid[row].length) && grid[row + dr][col + dc]) {
+                if (!(dr == 0 && dc == 0) &&
+                        ((row + dr) >= 0) && ((row + dr) < grid.length) &&
+                        ((col + dc) >= 0) && ((col + dc) < grid[row].length) &&
+                        grid[row + dr][col + dc]) {
                     neighbors++;
                     if (neighbors == 4) {
-                        break outerLoop; // No state change can occur with 4 neighbors
+                        break outerLoop;
                     }
                 }
             }
@@ -41,17 +49,5 @@ public class TheLife {
 
     public static boolean hasActiveCells() {
         return activeCellCount > 0;
-    }
-
-    private static void updateUI() {
-        UI.clearText();
-        UI.println("There are " + activeCellCount + " active cells");
-    }
-
-    public static void handleStep(boolean[][] grid) {
-        doStep(grid);
-        updateUI();
-        TheGame.cells = grid;
-        drawGame();
     }
 }
