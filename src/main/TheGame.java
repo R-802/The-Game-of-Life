@@ -26,7 +26,6 @@ public class TheGame {
     private static int canvasWidth, canvasHeight;
     public final int MIN_GRID_SIZE = 1;
     public int ANIMATION_SPEED = 100;
-    private boolean isDragging = false;
 
     public static void main(String[] args) {
         TheGame theGame = new TheGame();
@@ -76,7 +75,6 @@ public class TheGame {
         overlay.drawImage(imageBuffer, BUFFER_X_OFFSET, BUFFER_Y_OFFSET, null);
         overlay.dispose();
     }
-
 
     public static void clearCells() {
         changedCells.clear();
@@ -130,28 +128,51 @@ public class TheGame {
 
         // Seeds
         UI.addButton("Random Fill", () -> {
+            UI.clearText();
             Seeds.rand();
+            printDescription("Random Fill: Fills the grid with a random pattern of live and dead cells.");
         });
+
         UI.addButton("Glider", () -> {
+            UI.clearText();
             Seeds.glider();
+            printDescription("Glider: A small pattern that travels diagonally across the grid.");
         });
+
         UI.addButton("Gospel Glider Gun", () -> {
+            UI.clearText();
             Seeds.GGG();
+            printDescription("Gospel Glider Gun: A pattern that generates gliders, sending them out into the grid.");
         });
+
         UI.addButton("Lightweight Spaceship", () -> {
+            UI.clearText();
             Seeds.LWSS();
+            printDescription("Lightweight Spaceship (LWSS): A small pattern that travels across the grid.");
         });
+
         UI.addButton("Heavyweight Spaceship", () -> {
+            UI.clearText();
             Seeds.HWSS();
+            printDescription("Heavyweight Spaceship (HWSS): A larger pattern that travels across the grid.");
         });
+
         UI.addButton("Penta-Decathlon", () -> {
+            UI.clearText();
             Seeds.pentaDecathlon();
+            printDescription("Penta-Decathlon: A long-lived oscillating pattern.");
         });
+
         UI.addButton("Pulsar", () -> {
+            UI.clearText();
             Seeds.pulsar();
+            printDescription("Pulsar: A pattern that oscillates between three distinct states.");
         });
+
         UI.addButton("Cloverleaf", () -> {
+            UI.clearText();
             Seeds.cloverleaf();
+            printDescription("Cloverleaf: A pattern that evolves into a stable configuration resembling a cloverleaf.");
         });
 
         // Speed Adjustment
@@ -182,8 +203,9 @@ public class TheGame {
         UI.setMouseMotionListener(this::doMouse);
         drawGame();
         print("      Welcome to The Game of Life       ");
-        print("========================================");
+        print("----------------------------------------");
         print("  Select cells and click run to start!  ");
+
     }
 
     private void doMouse(String action, double x, double y) {
@@ -251,6 +273,25 @@ public class TheGame {
         COLUMNS = canvasWidth / MIN_GRID_SIZE;
         cells = new boolean[COLUMNS][ROWS];
         drawGame();
+    }
+
+    private void printDescription(String description) {
+        int len = description.length();
+        int start = 0;
+        StringBuilder output = new StringBuilder();
+        while (start < len) {
+            int end = Math.min(start + 38, len);
+            if (end < len && description.charAt(end) != ' ') {
+                int lastSpace = description.lastIndexOf(' ', end);
+                end = (lastSpace != -1) ? lastSpace : end;
+            }
+            output.append(description, start, end);
+            start = end + 1;
+            if (start < len) {
+                output.append("\n");
+            }
+        }
+        print(output.toString());
     }
 
     private void print(String s) {
