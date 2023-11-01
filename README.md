@@ -1,6 +1,9 @@
 # The Game of Life
 
 This repository contains a Java implementation of Conway's Game of Life, a cellular automaton devised by the British mathematician John Horton Conway. The game is a zero-player game, meaning that its evolution is determined by its initial state, requiring no further input from humans.
+<div align="center">
+  <img src="resources/demo.gif" alt="Demo">
+</div>
 
 ## Getting Started
 
