@@ -25,6 +25,7 @@ public class TheGame {
     private static Graphics graphics;
     private static int canvasWidth, canvasHeight;
     public final int MIN_GRID_SIZE = 1;
+    public boolean darkMode = false;
     public int ANIMATION_SPEED = 100;
 
     public static void main(String[] args) {
@@ -53,20 +54,17 @@ public class TheGame {
                 if (cells[row][col]) { // Draw if the cell is active
                     graphics.setColor(cellColor);
                     graphics.fillRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                } else { // Erase if the cell is inactive
-                    graphics.setColor(FOREGROUND_COL);
-                    graphics.drawRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 }
             }
         }
 
         // Draw grid
         if (drawGrid && CELL_SIZE > 10) {
-            graphics.setColor(Color.black);
+            graphics.setColor(Color.black); // Lines are always black
             int max = Math.max(canvasWidth, canvasHeight);
             for (int i = 0; i <= max; i += CELL_SIZE) {
-                graphics.drawLine(i, 0, i, canvasHeight);  // Vertical lines
-                graphics.drawLine(0, i, canvasWidth, i);  // Horizontal lines
+                graphics.drawLine(i, 0, i, canvasHeight);  // Vertical
+                graphics.drawLine(0, i, canvasWidth, i);  // Horizontal
             }
         }
 
@@ -193,8 +191,14 @@ public class TheGame {
             drawGame();
         });
         UI.addButton("Dark Mode", () -> {
-            FOREGROUND_COL = Color.black;
-            cellColor = Color.white;
+            darkMode = !darkMode;
+            if (darkMode) {
+                FOREGROUND_COL = Color.black;
+                cellColor = Color.white;
+            } else {
+                FOREGROUND_COL = Color.white;
+                cellColor = Color.black;
+            }
             drawGame();
         });
         UI.addButton("Quit", UI::quit);
@@ -239,9 +243,6 @@ public class TheGame {
             if (cells[row][col]) {
                 graphics.setColor(cellColor);
                 graphics.fillRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            } else {
-                graphics.setColor(FOREGROUND_COL);
-                graphics.drawRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             }
         }
         // Draw to the UI
