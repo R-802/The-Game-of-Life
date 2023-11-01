@@ -6,16 +6,18 @@ import util.TheLife;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TheGame {
 
     private static final int BUFFER_X_OFFSET = 479, BUFFER_Y_OFFSET = 56; // TODO: Remove these offsets.
-    private static final List<Point> changedCells = new ArrayList<Point>();
+    private static final Set<Point> changedCells = new HashSet<>();
     public static int CELL_SIZE = 15, ROWS, COLUMNS;
     public static boolean[][] cells; // 2-dimensional array of boolean values (the cells)
+    public static boolean pause = false;
     private static boolean drawGrid = true;
     private static Color cellColor = Color.black;
     private static Color FOREGROUND_COL = Color.white;
@@ -24,7 +26,6 @@ public class TheGame {
     private static int canvasWidth, canvasHeight;
     public final int MIN_GRID_SIZE = 1;
     public int ANIMATION_SPEED = 100;
-    public boolean pause = false;
     private boolean isDragging = false;
 
     public static void main(String[] args) {
@@ -39,38 +40,43 @@ public class TheGame {
             canvasWidth = newCanvasWidth;
             canvasHeight = newCanvasHeight;
             if (graphics != null) graphics.dispose();  // Dispose of old graphics object
-            imageBuffer = UI.getFrame().createVolatileImage(canvasWidth, canvasHeight);
+            imageBuffer = new BufferedImage(canvasWidth, canvasHeight, BufferedImage.TYPE_INT_ARGB);
             graphics = imageBuffer.getGraphics();
         }
 
+        // Clear the canvas
         graphics.setColor(FOREGROUND_COL);
         graphics.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        for (Point changedCell : changedCells) { // TODO: Fix concurrent mod exception, I suspect runGame() and threading is the cause.
-            int row = changedCell.x;
-            int col = changedCell.y;
-            if (cells[row][col]) {
-                graphics.setColor(cellColor);
-                graphics.fillRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            } else {
-                graphics.setColor(FOREGROUND_COL);
-                graphics.drawRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        // Draw cells
+        for (int row = 0; row < cells.length; row++) {
+            for (int col = 0; col < cells[row].length; col++) {
+                if (cells[row][col]) { // Draw if the cell is active
+                    graphics.setColor(cellColor);
+                    graphics.fillRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                } else { // Erase if the cell is inactive
+                    graphics.setColor(FOREGROUND_COL);
+                    graphics.drawRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
             }
         }
 
+        // Draw grid
         if (drawGrid && CELL_SIZE > 10) {
             graphics.setColor(Color.black);
-            int max = (canvasWidth >= canvasHeight) ? canvasWidth : canvasHeight;
+            int max = Math.max(canvasWidth, canvasHeight);
             for (int i = 0; i <= max; i += CELL_SIZE) {
                 graphics.drawLine(i, 0, i, canvasHeight);  // Vertical lines
                 graphics.drawLine(0, i, canvasWidth, i);  // Horizontal lines
             }
         }
 
+        // Draw to the UI
         Graphics overlay = UI.getFrame().getGraphics();
         overlay.drawImage(imageBuffer, BUFFER_X_OFFSET, BUFFER_Y_OFFSET, null);
         overlay.dispose();
     }
+
 
     public static void clearCells() {
         changedCells.clear();
@@ -183,21 +189,45 @@ public class TheGame {
     private void doMouse(String action, double x, double y) {
         int gridX = (int) (x / CELL_SIZE);
         int gridY = (int) (y / CELL_SIZE);
-        if (gridX >= 0 && gridX < cells.length && gridY >= 0 && gridY < cells[0].length) {
-            if (action.equals("pressed")) {
-                isDragging = true;  // set dragging state to true on mouse press
+
+        // Check if the coordinates are within the grid bounds
+        boolean isValidCell = gridX >= 0 && gridX < cells.length && gridY >= 0 && gridY < cells[0].length;
+        if (!isValidCell) return;
+
+        switch (action) {
+            case "pressed":
                 cells[gridX][gridY] = !cells[gridX][gridY];
                 UI.printMessage(" Selected Coordinate: row " + gridX + ", column " + gridY);
-                drawGame();
-            } else if (action.equals("dragged") && isDragging) {
-                cells[gridX][gridY] = true;
                 changedCells.add(new Point(gridX, gridY));
+                drawChangedCells();
+                break;
+            case "dragged":
+                cells[gridX][gridY] = true;
                 UI.printMessage(" Selected Coordinate: row " + gridX + ", column " + gridY);
-                drawGame();
-            } else if (action.equals("released")) {
-                isDragging = false;  // reset dragging state on mouse release
+                changedCells.add(new Point(gridX, gridY));
+                drawChangedCells();
+                break;
+        }
+    }
+
+    private void drawChangedCells() {
+        for (Point changedCell : changedCells) {
+            int row = changedCell.x;
+            int col = changedCell.y;
+            if (cells[row][col]) {
+                graphics.setColor(cellColor);
+                graphics.fillRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            } else {
+                graphics.setColor(FOREGROUND_COL);
+                graphics.drawRect(row * CELL_SIZE, col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             }
         }
+        // Draw to the UI
+        Graphics overlay = UI.getFrame().getGraphics();
+        overlay.drawImage(imageBuffer, BUFFER_X_OFFSET, BUFFER_Y_OFFSET, null);
+        overlay.dispose();
+        // Clear the set of changed cells
+        changedCells.clear();
     }
 
     private void runGame() {
