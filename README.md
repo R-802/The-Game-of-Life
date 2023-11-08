@@ -27,7 +27,7 @@ Ensure you have a Java environment set up on your machine, then compile and run 
 
 ## Features
 
-- **Canvas**: A white canvas where the cells live. Cells can be toggled on and off by clicking on them.
+- **Canvas**: A white or black canvas where the cells live. Cells can be toggled on and off by clicking on them.
 - **Run & Pause Buttons**: Start and pause the game simulation.
 - **Cell Color Button**: Change the color of the active cells.
 - **Grid Size Slider**: Adjust the size of the grid.
