@@ -40,7 +40,7 @@ public class TheGame {
             canvasWidth = newCanvasWidth;
             canvasHeight = newCanvasHeight;
             if (graphics != null) graphics.dispose();  // Dispose of old graphics object
-            imageBuffer = new BufferedImage(canvasWidth, canvasHeight, BufferedImage.TYPE_INT_ARGB);
+            imageBuffer = UI.getFrame().createVolatileImage(canvasWidth, canvasHeight);
             graphics = imageBuffer.getGraphics();
         }
 
@@ -119,7 +119,6 @@ public class TheGame {
         // Dynamic grid and cell size adjustment
         UI.addSlider("Cell Size", MIN_GRID_SIZE, 100, CELL_SIZE, (double v) -> {
             CELL_SIZE = (int) v;
-            UI.clearGraphics();
             UI.printMessage(" Grid Size: " + CELL_SIZE);
             drawGame();
         });
