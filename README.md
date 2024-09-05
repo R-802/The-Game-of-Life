@@ -7,7 +7,7 @@ This repository contains a Java implementation of Conway's Game of Life, a cellu
 
 ## Getting Started
 
-To get started, clone the repository to your local machine.
+Clone the repository to your local machine.
 
 ```bash
 git clone https://github.com/R-802/The-Game-of-Life.git
@@ -48,8 +48,6 @@ Ensure you have a Java environment set up on your machine, then compile and run 
 The `TheGame` class is the entry point of the program and handles the GUI setup and user interactions. It relies on other classes such as `TheLife` for simulation steps and `Seeds` for predefined cell configurations.
 
 The `drawGame` method is responsible for rendering the cells and grid on the canvas. The `runGame` method is the core loop of the simulation, continuously updating the state of the cells and redrawing the canvas.
-
-## Dependencies
 
 - The program relies on the `ecs100` library for the UI components.
 - Utility classes `TheLife` and `Seeds` for simulation logic and predefined cell configurations respectively.
